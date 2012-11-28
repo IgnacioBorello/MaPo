@@ -17,8 +17,8 @@ Autores
 Cooperadores
 ------------
 
--Castillo Luciano
--Venturi Agustin
--Guignard Javier
--Agresta Franco
--Canepa Pablo
+#Castillo Luciano
+#Venturi Agustin
+#Guignard Javier
+#Agresta Franco
+#Canepa Pablo
