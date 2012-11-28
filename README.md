@@ -11,15 +11,13 @@ Este proyecto fue escrito en python, con una libreria llamada pilas. Para el cor
 Autores 
 -------
 
--Bone Nicolas
--Borello Ignacio
+Bone Nicolas
+, Borello Ignacio
 
 Cooperadores
 ------------
-.. toctree::
-  :maxdepth: 1
   Castillo Luciano
-  Venturi Agustin
-  Guignard Javier
-  Agresta Franco
-  Canepa Pablo
+  , Venturi Agustin
+  , Guignard Javier
+  , Agresta Franco
+  , Canepa Pablo
