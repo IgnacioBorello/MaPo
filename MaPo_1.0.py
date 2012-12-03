@@ -9,15 +9,27 @@ from pilas.actores import Aceituna
 
 #Ponemos al enemigo (aceituna)
 class AceitunaVigilante(Aceituna):
-    
-    def __init__(self, x=0, y=15):
+    def __init__(self, x=0, y=15, num=1):
         Aceituna.__init__(self, x, y)
-#Esto hace que la aceituna se mueva de izquierda a derecha indefinidamente
+        self.num=num
+#Esto hace que la aceituna se mueva de distintas formas dependiendo de la variable num
     def actualizar(self):
-         
-        self.x += 2
-        if self.x > 120:
-            self.x = [-90],1.2
+        self.rotacion += 5
+        if self.num==1:
+            self.x += 2
+            if self.x > 120:
+                self.x = [-90],1.2
+        if self.num==2:
+            self.y += 4.7
+            if self.y >= 170:
+                self.y = [-80],0.7
+        if self.num==3:
+            self.rotacion +=13
+        if self.num==4:
+            self.y -=2
+            if self.y <= -200:
+                self.y += 4
+                    
 
 #esta es la escena que en la parte del menu principal muestra los agradecimientos
 class Agradecimientos(Escena):
@@ -40,6 +52,7 @@ class Agradecimientos(Escena):
         texto2 = pilas.actores.Texto("Luciano Castillo x 2", x = 0, y = 0)
         texto3 = pilas.actores.Texto("Agustin Venturi", x = 0, y = -40)
         texto3.escala = 0.5
+        adorno = [AceitunaVigilante(x=150,y=0,num=3),AceitunaVigilante(x=-150,y=0,num=3)]
    
 #La clase del juego en si
 class Juego(Escena):
@@ -120,7 +133,7 @@ class Juego(Escena):
         return pato
 #Aqui llamamos a la funcion del enemigo y la ponemos en el mapa
     def aceituna (self):
-        aceituna = AceitunaVigilante()
+        aceituna = AceitunaVigilante(num=1)
         return aceituna
 #Esto es el puntaje que aumenta cada vez que agarramos una moneda
     def texto (self):
@@ -137,41 +150,155 @@ class Juego(Escena):
         self.txt.aumentar()
         self.sonido_monedita.reproducir()
         self.cancer += 1
-        Html = open("Ganadores.html", "w")
-        Html.write("-----Nombre-----Puntaje:_-_-_-([" + str(self.cancer) + "])-_-_-_")
-        Html.close()
         if self.cancer == 3:
-            def comenzar():
+            
+            def reiniciar():
                 jueguito = Juego()
+            def comenzar():
+                jueguito = Nivel2()
             def salir():
                 Menu()
             
             opciones = [
-                        ("Volver a jugar =D!!!", comenzar),
+                        ("Continuar ", comenzar),
+                        ("Reiniciar ", reiniciar),
+                        ("Volver al menu", salir)
+                        ]
+            pilas.avisar('No sos pobre')
+            self.menu = pilas.actores.Menu(opciones)    
+
+#Aca ponemos la colision entre el marciano y la aceituna, hace que el marciano al tocar la aceituna desaparezca
+    def muerte(self, marcianito, aceituna):
+            marcianito.eliminar()
+            aceituna.eliminar()
+            Tecabe = pilas.actores.Texto("Te moriste =(", x = 0, y = 100)
+
+    #con esto iniciamos la clase con el mapa los enemigos y el personaje de nuevo despues de perder
+            def comenzar():
+                jueguito = Juego()
+    #con esto salimos del juego despues de perder(no se recomienda, el juego es demasiado divertido como para dejar de jugarlo)
+            def salir():
+                import sys
+                sys.exit(0)
+          
+            opciones = [
+                        ('Reiniciar', comenzar),
+                        ('Volver al Menu', salir)
+                        ]
+            self.menu = pilas.actores.Menu(opciones) 
+
+class Nivel2(Escena):
+    def __init__(self):
+        Escena.__init__(self)
+        self.cancer = 0        
+        self.mapa = self.crear_mapa()
+        self.martian = self.marcianito(self.mapa)
+        self.monedas = self.monedero()
+        self.aceituna = self.aceituna()
+        self.txt = self.texto()
+        pilas.mundo.colisiones.agregar(self.martian, self.monedas, self.robar)
+        pilas.mundo.colisiones.agregar(self.martian, self.aceituna, self.muerte)
+
+    def crear_mapa(self):
+        grilla = pilas.imagenes.cargar_grilla('plataformas.png',10,10)
+        mapa = pilas.actores.Mapa(grilla)
+
+
+    #pintando la plataforma grande
+        mapa.pintar_bloque(12, 10, 35)
+        mapa.pintar_bloque(12, 11, 11)
+        mapa.pintar_bloque(12, 12, 11)
+        mapa.pintar_bloque(12, 13, 11)
+        mapa.pintar_bloque(12, 14, 11)
+        mapa.pintar_bloque(12, 15, 11)
+        mapa.pintar_bloque(12, 15, 11)
+        mapa.pintar_bloque(12, 16, 12)
+
+        mapa.pintar_bloque(15, 3, 35)
+        mapa.pintar_bloque(15, 4, 11)
+        mapa.pintar_bloque(15, 5, 12)
+
+        mapa.pintar_bloque(9, 12, 35)
+        mapa.pintar_bloque(9, 13, 11)
+        mapa.pintar_bloque(9, 14, 11)
+        mapa.pintar_bloque(9, 15, 12)
+
+        mapa.pintar_bloque(6, 1, 35)
+        mapa.pintar_bloque(6, 2, 11)
+        mapa.pintar_bloque(6, 3, 11)
+        mapa.pintar_bloque(6, 4, 11)
+        mapa.pintar_bloque(6, 5, 11)
+        mapa.pintar_bloque(6, 6, 11)
+        mapa.pintar_bloque(6, 7, 12)
+
+
+        for i in range(0, 20):
+            mapa.pintar_bloque(17, i, 11, True)
+
+        fondo = pilas.fondos.Fondo('fondonave.jpg')
+        return mapa
+
+    def marcianito(self, mapa):
+        martian = pilas.actores.Martian(mapa)
+        martian.x = 200
+        martian.y = -224
+        martian.radio_de_colision=20
+        martian.aprender(pilas.habilidades.SeMantieneEnPantalla)
+        return martian
+    
+    def monedero(self):
+        monedas=[pilas.actores.Moneda(), pilas.actores.Moneda(), pilas.actores.Moneda()]
+        monedas[0].x = -70
+        monedas[0].y = -47
+        monedas[1].x = -230
+        monedas[1].y = 140
+        monedas[2].x = 270
+        monedas[2].y = 104
+        return monedas
+
+    def aceituna(self):
+        aceituna = [AceitunaVigilante(num=2), AceitunaVigilante(x=270,y=60,num=0)] 
+        return aceituna
+
+    def texto (self):
+        texto = ''
+        texto = pilas.actores.Puntaje(x=-240, y=200)
+        return texto
+
+    def muerte(self, marcianito, aceituna):
+        marcianito.eliminar()
+        aceituna.eliminar()
+        Tecabe = pilas.actores.Texto("Te moriste ", x = 0, y = 100)
+        def comenzar():
+            jueguito = Juego()
+        def salir():
+            Menu()
+
+        opciones = [
+                    ("Volver a empesar ", comenzar),
+                    ("Volver al menu", salir)
+                    ]
+        self.menu = pilas.actores.Menu(opciones)
+
+    def robar(self, marcianito, moneda):
+        moneda.eliminar()
+        self.txt.aumentar()
+        self.cancer += 1
+        if self.cancer == 3:
+            marcianito.eliminar()
+            def comenzar():
+                jueguito = Nivel2()
+            def salir():
+                Menu()
+
+            opciones = [
+                        ("Volver a jugar !!!", comenzar),
                         ("Volver al menu", salir)
                         ]
             pilas.avisar('No sos pobre')
             self.menu = pilas.actores.Menu(opciones)
 
-#Aca ponemos la colision entre el marciano y la aceituna, hace que el marciano al tocar la aceituna desaparezca
-    def muerte(self, marcianito, aceituna):
-        marcianito.eliminar()
-        aceituna.eliminar()
-        Tecabe = pilas.actores.Texto("Te moriste =(", x = 0, y = 100)
 
-#con esto iniciamos la clase con el mapa los enemigos y el personaje de nuevo despues de perder
-        def comenzar():
-            jueguito = Juego()
-#con esto salimos del juego despues de perder(no se recomienda, el juego es demasiado divertido como para dejar de jugarlo)
-        def salir():
-            import sys
-            sys.exit(0)
-      
-        opciones = [
-                    ('Volver a jugar =D!!!', comenzar),
-                    ('Salir =(', salir)
-                    ]
-        self.menu = pilas.actores.Menu(opciones)        
 #Este es el menu principal, con las tres opciones de comenzar, salir y de ver los Agradecimientos
 class Menu(Normal):
     def __init__(self):
@@ -202,4 +329,3 @@ class Menu(Normal):
 pilas.iniciar()
 Menu()
 pilas.ejecutar()
-
